@@ -1,0 +1,25 @@
+# Java (Spring Boot) & Angular Architecture Rules
+
+## Security Blueprint
+- No hardcoded secrets. Use `@Value("${...}")` or environment variables.
+- Enforce Role-Based Access Control (RBAC) via Spring Security (`@PreAuthorize`).
+- Sanitize all text inputs. Prevent SQL Injection via Spring Data JPA/Hibernate.
+- Enforce CORS rules. Restrict origins, methods, and headers.
+- Enable CSRF protection. Use `CookieCsrfTokenRepository` with `HttpOnly` flags.
+- Use parameterized queries. Never concatenate strings in SQL/HQL.
+- Validate all incoming DTOs using standard `jakarta.validation.constraints`.
+- Hash passwords using BCrypt with a workload factor of 12+.
+
+## Performance & Optimization Blueprint
+- Use Spring Boot 3.x virtual threads for high-concurrency I/O.
+- Implement database pagination using `Pageable` and `Slice` for large datasets.
+- Configure Hazelcast or Redis for distributed caching of frequent read operations.
+- Use explicit DTO mapping (MapStruct). Avoid exposing raw entity objects.
+- Angular: Use `provideZoneChangeDetection({ eventCoalescing: true })` for optimization.
+- Angular: Use `changeDetection: ChangeDetectionStrategy.OnPush` across components.
+- Angular: Enable lazy loading for all feature modules using `loadComponent`.
+- Angular: Prevent memory leaks. Track and clean subscriptions via `takeUntilDestroyed()`.
+
+## Output Style
+- Generate complete, production-ready code. No placeholders like `// TODO`.
+- Include precise imports. Do not use wildcard imports.
