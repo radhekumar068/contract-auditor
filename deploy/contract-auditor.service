@@ -1,0 +1,19 @@
+[Unit]
+Description=Contract Auditor Backend
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/contract-auditor/contract-auditor-backend
+EnvironmentFile=/etc/contract-auditor.env
+ExecStart=/usr/bin/java -jar /home/ubuntu/contract-auditor/contract-auditor-backend/target/contract-auditor-backend-1.0.0.jar
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=contract-auditor
+
+[Install]
+WantedBy=multi-user.target
