@@ -36,7 +36,7 @@ echo "==> Restarting services..."
 sudo systemctl restart contract-auditor
 sudo nginx -t && sudo systemctl reload nginx
 
-sleep 5
+sleep 30
 if curl -sf http://127.0.0.1:8081/api/health > /dev/null; then
     echo "==> Backend health check: OK"
 else

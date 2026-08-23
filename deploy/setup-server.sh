@@ -28,10 +28,14 @@ if ! command -v node &>/dev/null || [[ "$(node -v | cut -d. -f1 | tr -d v)" -lt 
 fi
 
 echo "==> Opening OS firewall for HTTP/HTTPS..."
-sudo iptables -C INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null || \
-    sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
-sudo iptables -C INPUT -p tcp --dport 443 -j ACCEPT 2>/dev/null || \
-    sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+# Oracle Ubuntu images have a REJECT rule that must come AFTER allow rules.
+sudo iptables -D INPUT -j REJECT --reject-with icmp-host-prohibited 2>/dev/null || true
+sudo iptables -C INPUT -m state --state NEW -p tcp --dport 80 -j ACCEPT 2>/dev/null || \
+    sudo iptables -I INPUT 5 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+sudo iptables -C INPUT -m state --state NEW -p tcp --dport 443 -j ACCEPT 2>/dev/null || \
+    sudo iptables -I INPUT 5 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+sudo iptables -C INPUT -j REJECT --reject-with icmp-host-prohibited 2>/dev/null || \
+    sudo iptables -A INPUT -j REJECT --reject-with icmp-host-prohibited
 sudo netfilter-persistent save
 
 echo "==> Configuring MySQL..."
