@@ -8,6 +8,7 @@ Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/contract-auditor/contract-auditor-backend
 EnvironmentFile=/etc/contract-auditor.env
+Environment=APP_ENV_FILE=/etc/contract-auditor.env
 ExecStart=/usr/bin/java -jar /home/ubuntu/contract-auditor/contract-auditor-backend/target/contract-auditor-backend-1.0.0.jar
 Restart=always
 RestartSec=10

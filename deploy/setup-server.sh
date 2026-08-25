@@ -48,6 +48,7 @@ sudo mysql -e "FLUSH PRIVILEGES;"
 
 PUBLIC_IP="$(curl -4 -s --max-time 5 ifconfig.me || curl -4 -s --max-time 5 icanhazip.com || echo 'localhost')"
 CORS_ORIGIN="http://${PUBLIC_IP}"
+FRONTEND_BASE_URL="http://${PUBLIC_IP}"
 
 echo "==> Writing ${ENV_FILE}..."
 sudo tee "${ENV_FILE}" > /dev/null <<EOF
@@ -55,8 +56,12 @@ DB_URL=jdbc:mysql://localhost:3306/contract_auditor?useSSL=false&allowPublicKeyR
 DB_USERNAME=contract_user
 DB_PASSWORD=${DB_PASSWORD}
 JWT_SECRET=${JWT_SECRET}
+JWT_EXPIRATION_MS=86400000
 SERVER_PORT=8081
 CORS_ALLOWED_ORIGINS=${CORS_ORIGIN}
+FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+PASSWORD_RESET_EXPIRY_MINUTES=60
+NOTIFICATION_CRON=0 0 8 * * *
 EOF
 sudo chmod 600 "${ENV_FILE}"
 

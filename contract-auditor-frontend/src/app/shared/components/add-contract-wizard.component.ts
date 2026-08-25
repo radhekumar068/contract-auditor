@@ -121,27 +121,105 @@ import { userFacingHttpError } from '../../core/utils/http-error';
   }
   `,
   styles: [`
-    .overlay { position: fixed; inset: 0; background: rgba(15,23,42,.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; overflow-y: auto; }
-    .modal { background: #fff; border-radius: 16px; max-width: 560px; width: 100%; box-shadow: 0 20px 60px rgba(15,23,42,.2); margin: auto; }
-    header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; }
-    h2 { margin: 0; font-size: 1.125rem; }
-    form { padding: 1.5rem; display: grid; gap: 1rem; }
-    .presets { display: grid; gap: .5rem; }
-    .section-label { font-size: .8125rem; color: #64748b; font-weight: 600; }
-    .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .chip { padding: .35rem .75rem; border-radius: 999px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: .8125rem; cursor: pointer; font-weight: 500; }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 560px;
+      width: 100%;
+      min-width: 0;
+      max-height: calc(100dvh - 2rem);
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+      margin: auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    h2 { margin: 0; font-size: 1.125rem; min-width: 0; }
+    form { padding: 1.5rem; display: grid; gap: 1rem; min-width: 0; }
+    .presets { display: grid; gap: 0.5rem; min-width: 0; }
+    .section-label { font-size: 0.8125rem; color: #64748b; font-weight: 600; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip {
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      font-weight: 500;
+      max-width: 100%;
+    }
     .chip:hover { background: #eff6ff; border-color: #2563eb; color: #2563eb; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .field { display: grid; gap: .35rem; }
-    label { font-size: .8125rem; color: #64748b; font-weight: 500; }
-    input, select, textarea { padding: .55rem .75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: .875rem; }
+    .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .field { display: grid; gap: 0.35rem; min-width: 0; }
+    label { font-size: 0.8125rem; color: #64748b; font-weight: 500; }
+    input, select, textarea {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
     input.ng-invalid.ng-touched, select.ng-invalid.ng-touched { border-color: #dc2626; }
-    .error { color: #dc2626; font-size: .8125rem; margin: 0; }
-    footer { display: flex; justify-content: flex-end; gap: .75rem; padding-top: .5rem; }
-    .btn-primary { padding: .55rem 1rem; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
-    .btn-secondary { padding: .55rem 1rem; background: #f1f5f9; color: #334155; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; }
+    .error { color: #dc2626; font-size: 0.8125rem; margin: 0; }
+    footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 0.5rem; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 0.55rem 1rem;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 0.55rem 1rem;
+      background: #f1f5f9;
+      color: #334155;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #64748b;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    @media (max-width: 640px) {
+      .overlay { align-items: flex-start; padding: 0.75rem; }
+      .modal { max-height: calc(100dvh - 1.5rem); border-radius: 12px; }
+      header, form { padding: 1rem; }
+      .row { grid-template-columns: 1fr; gap: 0.85rem; }
+      footer { flex-direction: column-reverse; }
+      footer .btn-primary,
+      footer .btn-secondary { width: 100%; text-align: center; }
+    }
   `],
 })
 export class AddContractWizardComponent {

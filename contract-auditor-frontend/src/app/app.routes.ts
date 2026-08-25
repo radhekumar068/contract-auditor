@@ -28,6 +28,12 @@ export const routes: Routes = [
       import('./features/auth/forgot-password.component').then((m) => m.ForgotPasswordComponent),
   },
   {
+    path: 'reset-password',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/auth/reset-password.component').then((m) => m.ResetPasswordComponent),
+  },
+  {
     path: 'user-guide',
     loadComponent: () =>
       import('./features/landing/user-guide.component').then((m) => m.UserGuideComponent),

@@ -161,6 +161,16 @@ import { MoneyPipe } from '../../shared/pipes/money.pipe';
     .error-state { background: #fff; padding: 2rem; border-radius: 12px; text-align: center; }
     .error-state p { color: #64748b; margin: 0 0 1rem; }
     .btn-retry { padding: 0.5rem 1rem; background: #4f61c8; color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+    @media (max-width: 768px) {
+      .subscriptions-page { gap: 1.25rem; }
+      .page-header { align-items: stretch; }
+      .page-header .btn-primary { width: 100%; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .search { min-width: 0; width: 100%; }
+      .toolbar select { width: 100%; }
+      .view-toggle { align-self: flex-start; }
+    }
   `],
 })
 export class SubscriptionsComponent {

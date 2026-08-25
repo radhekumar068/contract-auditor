@@ -1,13 +1,17 @@
 spring:
   application:
     name: contract-auditor
+  config:
+    import:
+      - optional:file:${APP_ENV_FILE:C:/env.properties}
+      - optional:file:../env.properties
   threads:
     virtual:
       enabled: true
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/contract_auditor?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   flyway:
     enabled: true
@@ -21,29 +25,34 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
   mail:
-    host: ${MAIL_HOST:localhost}
-    port: ${MAIL_PORT:1025}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
-          auth: false
+          auth: ${MAIL_SMTP_AUTH}
           starttls:
-            enable: false
+            enable: ${MAIL_SMTP_STARTTLS}
 
 app:
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  mail:
+    from: ${MAIL_FROM}
+  password-reset:
+    frontend-base-url: ${FRONTEND_BASE_URL}
+    token-expiry-minutes: ${PASSWORD_RESET_EXPIRY_MINUTES}
   jwt:
-    secret: ${JWT_SECRET:change-me-to-a-secure-secret-key-at-least-256-bits-long-for-production}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS}
   notification:
-    scheduler-cron: ${NOTIFICATION_CRON:0 0 8 * * *}
+    scheduler-cron: ${NOTIFICATION_CRON}
     default-reminder-days: 7
 
 server:
-  port: ${SERVER_PORT:8081}
+  port: ${SERVER_PORT}
 
 springdoc:
   api-docs:
