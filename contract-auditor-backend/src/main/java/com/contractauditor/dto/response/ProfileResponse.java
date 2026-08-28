@@ -11,6 +11,7 @@ public record ProfileResponse(
         Instant lastLoginAt,
         String countryCode,
         String preferredCurrency,
-        int activeDeviceCount
+        int activeDeviceCount,
+        String phoneNumber
 ) {
 }

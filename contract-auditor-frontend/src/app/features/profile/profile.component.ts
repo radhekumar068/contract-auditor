@@ -88,6 +88,21 @@ import { userFacingHttpError } from '../../core/utils/http-error';
               </div>
               <div class="field-row">
                 <div>
+                  <span class="label">Phone Number</span>
+                  @if (editingPhone()) {
+                    <input type="tel" formControlName="phoneNumber" inputmode="numeric" autocomplete="tel" maxlength="15" />
+                  } @else {
+                    <strong>{{ profileForm.controls.phoneNumber.value || '—' }}</strong>
+                  }
+                </div>
+                <button type="button" class="btn-icon" (click)="toggleEdit('phone')" aria-label="Edit phone number">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="field-row">
+                <div>
                   <span class="label">Country</span>
                   @if (editingCountry()) {
                     <select formControlName="countryCode">
@@ -319,6 +334,7 @@ export class ProfileComponent implements OnInit {
   readonly passwordOpen = signal(false);
   readonly editingName = signal(false);
   readonly editingEmail = signal(false);
+  readonly editingPhone = signal(false);
   readonly editingCountry = signal(false);
   readonly countries = COUNTRIES;
   readonly errorMessage = signal('');
@@ -327,6 +343,7 @@ export class ProfileComponent implements OnInit {
   readonly profileForm = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.maxLength(255)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
+    phoneNumber: ['', [Validators.pattern(/^\d{10,15}$/)]],
     countryCode: [DEFAULT_COUNTRY_CODE, [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
   });
 
@@ -351,11 +368,13 @@ export class ProfileComponent implements OnInit {
       });
   }
 
-  toggleEdit(field: 'name' | 'email' | 'country'): void {
+  toggleEdit(field: 'name' | 'email' | 'phone' | 'country'): void {
     if (field === 'name') {
       this.editingName.update((value) => !value);
     } else if (field === 'email') {
       this.editingEmail.update((value) => !value);
+    } else if (field === 'phone') {
+      this.editingPhone.update((value) => !value);
     } else {
       this.editingCountry.update((value) => !value);
     }
@@ -372,6 +391,7 @@ export class ProfileComponent implements OnInit {
       fullName: this.profileForm.controls.fullName.value.trim(),
       email: this.profileForm.controls.email.value.trim().toLowerCase(),
       countryCode: this.profileForm.controls.countryCode.value,
+      phoneNumber: this.profileForm.controls.phoneNumber.value.trim() || null,
     };
     this.userApi.updateProfile(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -380,6 +400,7 @@ export class ProfileComponent implements OnInit {
           this.applyProfile(response.profile, response.accessToken);
           this.editingName.set(false);
           this.editingEmail.set(false);
+          this.editingPhone.set(false);
           this.editingCountry.set(false);
           this.saving.set(false);
           this.successMessage.set('Profile changes saved.');
@@ -441,6 +462,7 @@ export class ProfileComponent implements OnInit {
     this.profileForm.reset({
       fullName: profile.fullName,
       email: profile.email,
+      phoneNumber: profile.phoneNumber ?? '',
       countryCode: profile.countryCode || DEFAULT_COUNTRY_CODE,
     });
     this.loading.set(false);
@@ -454,6 +476,7 @@ export class ProfileComponent implements OnInit {
       lastLoginAt: profile.lastLoginAt,
       countryCode: profile.countryCode || DEFAULT_COUNTRY_CODE,
       preferredCurrency: profile.preferredCurrency || currencyForCountry(profile.countryCode),
+      phoneNumber: profile.phoneNumber ?? null,
     };
     if (accessToken) {
       this.authService.setSession(accessToken, nextUser);

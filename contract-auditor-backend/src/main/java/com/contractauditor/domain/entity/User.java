@@ -49,6 +49,9 @@ public class User {
     @Column(name = "preferred_currency", nullable = false, length = 3)
     private String preferredCurrency;
 
+    @Column(name = "phone_number", length = 15)
+    private String phoneNumber;
+
     @PrePersist
     void onCreate() {
         Instant now = Instant.now();
@@ -131,5 +134,13 @@ public class User {
 
     public void setPreferredCurrency(String preferredCurrency) {
         this.preferredCurrency = preferredCurrency;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

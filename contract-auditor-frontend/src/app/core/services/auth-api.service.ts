@@ -14,6 +14,7 @@ export class AuthApiService {
     email: string;
     password: string;
     fullName: string;
+    phoneNumber: string;
     countryCode: string;
     role: UserRole;
   }): Observable<AuthResponse> {

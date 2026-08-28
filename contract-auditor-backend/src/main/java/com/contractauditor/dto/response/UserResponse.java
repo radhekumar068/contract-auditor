@@ -12,6 +12,7 @@ public record UserResponse(
         Instant createdAt,
         Instant lastLoginAt,
         String countryCode,
-        String preferredCurrency
+        String preferredCurrency,
+        String phoneNumber
 ) {
 }

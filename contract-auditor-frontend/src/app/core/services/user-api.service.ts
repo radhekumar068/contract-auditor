@@ -13,7 +13,12 @@ export class UserApiService {
     return this.http.get<Profile>(this.baseUrl);
   }
 
-  updateProfile(payload: { fullName: string; email: string; countryCode: string }): Observable<UpdateProfileResponse> {
+  updateProfile(payload: {
+    fullName: string;
+    email: string;
+    countryCode: string;
+    phoneNumber?: string | null;
+  }): Observable<UpdateProfileResponse> {
     return this.http.put<UpdateProfileResponse>(this.baseUrl, payload);
   }
 

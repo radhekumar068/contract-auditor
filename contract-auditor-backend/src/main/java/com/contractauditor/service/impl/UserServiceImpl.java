@@ -73,6 +73,9 @@ public class UserServiceImpl implements UserService {
         user.setEmail(nextEmail);
         user.setCountryCode(countryCode);
         user.setPreferredCurrency(CountryCurrency.currencyFor(countryCode));
+        if (request.phoneNumber() != null && !request.phoneNumber().isBlank()) {
+            user.setPhoneNumber(request.phoneNumber().trim());
+        }
         userRepository.save(user);
 
         UpdateProfileResponse response = new UpdateProfileResponse(

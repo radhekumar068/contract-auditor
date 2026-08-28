@@ -9,6 +9,7 @@ export interface User {
   lastLoginAt?: string | null;
   countryCode: string;
   preferredCurrency: string;
+  phoneNumber?: string | null;
 }
 
 export interface Profile {
@@ -20,6 +21,7 @@ export interface Profile {
   activeDeviceCount: number;
   countryCode: string;
   preferredCurrency: string;
+  phoneNumber?: string | null;
 }
 
 export interface UpdateProfileResponse {

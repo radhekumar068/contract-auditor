@@ -11,6 +11,7 @@ public record RegisterRequest(
         @NotBlank @Email String email,
         @NotBlank @Size(min = 8, max = 100) String password,
         @NotBlank @Size(max = 255) String fullName,
+        @NotBlank @Pattern(regexp = "^\\d{10,15}$") String phoneNumber,
         @NotBlank @Pattern(regexp = "^[A-Za-z]{2}$") String countryCode,
         @NotNull UserRole role
 ) {

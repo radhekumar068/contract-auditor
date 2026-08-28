@@ -37,6 +37,11 @@ import { userFacingHttpError } from '../../core/utils/http-error';
           <input type="password" formControlName="password" autocomplete="new-password" />
         </label>
         <label>
+          Phone Number
+          <input type="tel" formControlName="phoneNumber" inputmode="numeric" autocomplete="tel" />
+          <span class="hint">10–15 digits, no spaces or symbols</span>
+        </label>
+        <label>
           Country
           <select formControlName="countryCode">
             <option value="">Select country</option>
@@ -65,6 +70,7 @@ import { userFacingHttpError } from '../../core/utils/http-error';
     .subtitle { color: #64748b; margin-bottom: 1.5rem; }
     form { display: grid; gap: 1rem; }
     label { display: grid; gap: .35rem; font-size: .875rem; color: #334155; }
+    .hint { font-size: .75rem; color: #94a3b8; }
     input, select { padding: .65rem .75rem; border: 1px solid #cbd5e1; border-radius: 8px; }
     button { padding: .75rem; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font-weight: 600; cursor: pointer; }
     button:disabled { opacity: .6; cursor: not-allowed; }
@@ -90,6 +96,7 @@ export class RegisterComponent {
     fullName: ['', [Validators.required, Validators.maxLength(255)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
+    phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10,15}$/)]],
     countryCode: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
     role: this.fb.nonNullable.control<UserRole>('USER', [Validators.required]),
   });

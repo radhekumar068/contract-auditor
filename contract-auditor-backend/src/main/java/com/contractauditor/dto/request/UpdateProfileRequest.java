@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 public record UpdateProfileRequest(
         @NotBlank @Size(max = 255) String fullName,
         @NotBlank @Email @Size(max = 255) String email,
-        @NotBlank @Pattern(regexp = "^[A-Za-z]{2}$") String countryCode
+        @NotBlank @Pattern(regexp = "^[A-Za-z]{2}$") String countryCode,
+        @Pattern(regexp = "^\\d{10,15}$") String phoneNumber
 ) {
 }

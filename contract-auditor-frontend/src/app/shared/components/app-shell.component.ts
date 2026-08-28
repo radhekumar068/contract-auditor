@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { PhoneUpdatePromptComponent } from './phone-update-prompt.component';
 
 interface NavItem {
   label: string;
@@ -11,7 +12,7 @@ interface NavItem {
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, PhoneUpdatePromptComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell" [class.nav-open]="mobileNavOpen()">
@@ -101,6 +102,13 @@ interface NavItem {
       <main class="content">
         <router-outlet />
       </main>
+
+      @if (showPhonePrompt()) {
+        <app-phone-update-prompt
+          (dismissed)="closePhonePrompt()"
+          (saved)="closePhonePrompt()"
+        />
+      }
     </div>
   `,
   styles: [`
@@ -438,6 +446,15 @@ export class AppShellComponent {
 
   readonly user = this.authService.currentUser;
   readonly mobileNavOpen = signal(false);
+  readonly showPhonePrompt = signal(false);
+
+  constructor() {
+    const currentUser = this.authService.currentUser();
+    const dismissed = sessionStorage.getItem(AuthService.phonePromptDismissedKey);
+    if (currentUser && !currentUser.phoneNumber && !dismissed) {
+      this.showPhonePrompt.set(true);
+    }
+  }
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
@@ -453,6 +470,10 @@ export class AppShellComponent {
 
   closeMobileNav(): void {
     this.mobileNavOpen.set(false);
+  }
+
+  closePhonePrompt(): void {
+    this.showPhonePrompt.set(false);
   }
 
   @HostListener('window:resize')

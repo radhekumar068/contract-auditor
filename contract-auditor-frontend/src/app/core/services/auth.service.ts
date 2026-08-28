@@ -6,6 +6,7 @@ import { User } from '../models/contract.models';
 export class AuthService {
   private readonly tokenKey = 'contract_auditor_token';
   private readonly userKey = 'contract_auditor_user';
+  static readonly phonePromptDismissedKey = 'phone_prompt_dismissed';
 
   private accessToken: string | null = null;
 
@@ -35,6 +36,7 @@ export class AuthService {
   logout(): void {
     this.accessToken = null;
     this.currentUser.set(null);
+    sessionStorage.removeItem(AuthService.phonePromptDismissedKey);
     this.clearPersistedSession();
   }
 

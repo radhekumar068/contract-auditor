@@ -96,6 +96,7 @@ public class AuthServiceImpl implements AuthService {
         String countryCode = CountryCurrency.normalizeCountry(request.countryCode());
         user.setCountryCode(countryCode);
         user.setPreferredCurrency(CountryCurrency.currencyFor(countryCode));
+        user.setPhoneNumber(request.phoneNumber().trim());
         user.setRole(request.role());
         user.setLastLoginAt(Instant.now());
         userRepository.save(user);
