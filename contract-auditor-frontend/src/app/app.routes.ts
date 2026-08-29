@@ -75,6 +75,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/profile/profile.component').then((m) => m.ProfileComponent),
       },
+      {
+        path: 'oauth/google/callback',
+        loadComponent: () =>
+          import('./features/email-discovery/google-oauth-callback.component').then((m) => m.GoogleOAuthCallbackComponent),
+      },
     ],
   },
   {

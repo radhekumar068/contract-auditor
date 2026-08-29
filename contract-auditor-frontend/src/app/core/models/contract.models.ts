@@ -221,6 +221,44 @@ export const VENDOR_PRESETS: VendorPreset[] = [
   { name: 'Planet Fitness', provider: 'Planet Fitness', category: 'Fitness', amount: 24.99, billingFrequency: 'MONTHLY', cancellationWorkflow: 'Visit club or call member services to cancel' },
 ];
 
+export interface EmailConnectionStatus {
+  featureEnabled: boolean;
+  connected: boolean;
+  emailAddress: string | null;
+  connectedAt: string | null;
+  lastSyncAt: string | null;
+}
+
+export interface EmailDiscoveryAuthUrl {
+  authUrl: string;
+  state: string;
+}
+
+export interface DiscoveredSubscription {
+  vendorKey: string;
+  name: string;
+  provider: string;
+  category: string;
+  amount: number;
+  currency: string;
+  billingFrequency: BillingFrequency;
+  renewalDate: string;
+  confidence: number;
+  alreadyExists: boolean;
+  sourceSubject: string;
+}
+
+export interface EmailDiscoveryScanResult {
+  messagesScanned: number;
+  suggestions: DiscoveredSubscription[];
+}
+
+export interface EmailDiscoveryImportResult {
+  imported: Subscription[];
+  skipped: string[];
+  errors: { vendorKey: string; message: string }[];
+}
+
 export const CATEGORY_COLORS: Record<string, string> = {
   Software: '#4f61c8',
   Entertainment: '#2d3a6b',

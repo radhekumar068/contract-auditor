@@ -42,7 +42,8 @@ public class SecurityConfig {
 
     private static final String[] PROTECTED_API = {
             "/api/subscriptions/**",
-            "/api/analytics/**"
+            "/api/analytics/**",
+            "/api/email-discovery/**"
     };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;

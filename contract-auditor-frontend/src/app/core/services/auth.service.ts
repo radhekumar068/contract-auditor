@@ -13,7 +13,7 @@ export class AuthService {
   readonly currentUser = signal<User | null>(null);
 
   constructor() {
-    this.clearPersistedSession();
+    this.restoreSession();
   }
 
   getAccessToken(): string | null {
@@ -25,12 +25,18 @@ export class AuthService {
   }
 
   setSession(token: string, user: User): void {
+    const normalized = this.normalizeUser(user);
     this.accessToken = token;
-    this.currentUser.set(this.normalizeUser(user));
+    this.currentUser.set(normalized);
+    this.persistSession(token, normalized);
   }
 
   updateCurrentUser(user: User): void {
-    this.currentUser.set(this.normalizeUser(user));
+    const normalized = this.normalizeUser(user);
+    this.currentUser.set(normalized);
+    if (this.accessToken) {
+      this.persistSession(this.accessToken, normalized);
+    }
   }
 
   logout(): void {
@@ -40,7 +46,30 @@ export class AuthService {
     this.clearPersistedSession();
   }
 
+  private restoreSession(): void {
+    try {
+      const token = sessionStorage.getItem(this.tokenKey);
+      const userRaw = sessionStorage.getItem(this.userKey);
+      if (!token || !userRaw) {
+        this.clearPersistedSession();
+        return;
+      }
+      const user = JSON.parse(userRaw) as User;
+      this.accessToken = token;
+      this.currentUser.set(this.normalizeUser(user));
+    } catch {
+      this.clearPersistedSession();
+    }
+  }
+
+  private persistSession(token: string, user: User): void {
+    sessionStorage.setItem(this.tokenKey, token);
+    sessionStorage.setItem(this.userKey, JSON.stringify(user));
+  }
+
   private clearPersistedSession(): void {
+    sessionStorage.removeItem(this.tokenKey);
+    sessionStorage.removeItem(this.userKey);
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
   }

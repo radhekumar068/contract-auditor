@@ -50,6 +50,14 @@ app:
   notification:
     scheduler-cron: ${NOTIFICATION_CRON}
     default-reminder-days: 7
+  email-discovery:
+    enabled: ${EMAIL_DISCOVERY_ENABLED}
+    google-client-id: ${GOOGLE_CLIENT_ID}
+    google-client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-uri: ${GOOGLE_OAUTH_REDIRECT_URI}
+    token-encryption-key: ${EMAIL_TOKEN_ENCRYPTION_KEY}
+    scan-max-messages: 100
+    scan-lookback-days: 730
 
 server:
   port: ${SERVER_PORT}

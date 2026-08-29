@@ -1,19 +1,22 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { combineLatest, map, startWith } from 'rxjs';
 import { BillingFrequency, Subscription, SubscriptionStatus } from '../../core/models/contract.models';
+import { EmailDiscoveryApiService } from '../../core/services/email-discovery-api.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import { userFacingHttpError } from '../../core/utils/http-error';
 import { VendorAvatarComponent } from '../../shared/components/vendor-avatar.component';
 import { AddContractWizardComponent } from '../../shared/components/add-contract-wizard.component';
+import { DiscoverFromEmailComponent } from '../../shared/components/discover-from-email.component';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
 
 @Component({
   selector: 'app-subscriptions',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, VendorAvatarComponent, AddContractWizardComponent, MoneyPipe],
+  imports: [DatePipe, ReactiveFormsModule, VendorAvatarComponent, AddContractWizardComponent, DiscoverFromEmailComponent, MoneyPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="subscriptions-page">
@@ -22,7 +25,12 @@ import { MoneyPipe } from '../../shared/pipes/money.pipe';
           <h1>Subscriptions</h1>
           <p>Manage all your recurring commitments in one place</p>
         </div>
-        <button type="button" class="btn-primary" (click)="openWizard()">Add Contract</button>
+        <div class="header-actions">
+          @if (discoveryEnabled()) {
+            <button type="button" class="btn-secondary" (click)="openDiscovery()">Discover from Email</button>
+          }
+          <button type="button" class="btn-primary" (click)="openWizard()">Add Contract</button>
+        </div>
       </header>
 
       <div class="toolbar">
@@ -59,6 +67,17 @@ import { MoneyPipe } from '../../shared/pipes/money.pipe';
         <div class="error-state">
           <p>{{ loadError() }}</p>
           <button type="button" class="btn-retry" (click)="loadSubscriptions()">Retry</button>
+        </div>
+      } @else if (filtered().length === 0 && subscriptions().length === 0) {
+        <div class="empty onboarding">
+          <h2>No subscriptions yet</h2>
+          <p>Add contracts manually or discover them from your Gmail inbox.</p>
+          <div class="empty-actions">
+            @if (discoveryEnabled()) {
+              <button type="button" class="btn-secondary" (click)="openDiscovery()">Discover from Email</button>
+            }
+            <button type="button" class="btn-primary" (click)="openWizard()">Add Contract</button>
+          </div>
         </div>
       } @else if (filtered().length === 0) {
         <p class="empty">No subscriptions match your filters.</p>
@@ -120,6 +139,7 @@ import { MoneyPipe } from '../../shared/pipes/money.pipe';
       }
 
       <app-add-contract-wizard #wizard (saved)="loadSubscriptions()" />
+      <app-discover-from-email #discovery (imported)="loadSubscriptions()" />
     </div>
   `,
   styles: [`
@@ -128,6 +148,8 @@ import { MoneyPipe } from '../../shared/pipes/money.pipe';
     h1 { margin: 0; color: #0f172a; }
     p { margin: .35rem 0 0; color: #64748b; }
     .btn-primary { padding: .55rem 1rem; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-secondary { padding: .55rem 1rem; background: #fff; color: #334155; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .header-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
     .toolbar { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
     .search { flex: 1; min-width: 200px; padding: .55rem .75rem; border: 1px solid #cbd5e1; border-radius: 8px; }
     select { padding: .55rem .75rem; border: 1px solid #cbd5e1; border-radius: 8px; }
@@ -158,6 +180,8 @@ import { MoneyPipe } from '../../shared/pipes/money.pipe';
     .renewal { font-size: .8125rem; color: #64748b; margin: 0 0 1rem; }
     .btn-delete { padding: .4rem .75rem; border: 1px solid #fecaca; background: #fff; color: #dc2626; border-radius: 6px; cursor: pointer; font-size: .8125rem; }
     .loading, .empty { color: #64748b; background: #fff; padding: 2rem; border-radius: 12px; text-align: center; }
+    .empty.onboarding h2 { margin: 0 0 .5rem; color: #0f172a; }
+    .empty-actions { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
     .error-state { background: #fff; padding: 2rem; border-radius: 12px; text-align: center; }
     .error-state p { color: #64748b; margin: 0 0 1rem; }
     .btn-retry { padding: 0.5rem 1rem; background: #4f61c8; color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
@@ -165,7 +189,9 @@ import { MoneyPipe } from '../../shared/pipes/money.pipe';
     @media (max-width: 768px) {
       .subscriptions-page { gap: 1.25rem; }
       .page-header { align-items: stretch; }
-      .page-header .btn-primary { width: 100%; }
+      .page-header .btn-primary,
+      .page-header .btn-secondary { width: 100%; }
+      .header-actions { width: 100%; flex-direction: column; }
       .toolbar { flex-direction: column; align-items: stretch; }
       .search { min-width: 0; width: 100%; }
       .toolbar select { width: 100%; }
@@ -173,15 +199,19 @@ import { MoneyPipe } from '../../shared/pipes/money.pipe';
     }
   `],
 })
-export class SubscriptionsComponent {
+export class SubscriptionsComponent implements OnInit {
   private readonly subscriptionService = inject(SubscriptionService);
+  private readonly emailDiscoveryApi = inject(EmailDiscoveryApiService);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly wizard = viewChild.required<AddContractWizardComponent>('wizard');
+  readonly discovery = viewChild.required<DiscoverFromEmailComponent>('discovery');
 
   readonly subscriptions = signal<Subscription[]>([]);
   readonly loading = signal(true);
   readonly loadError = signal('');
+  readonly discoveryEnabled = signal(false);
   readonly viewMode = signal<'list' | 'grid'>('list');
 
   readonly searchControl = new FormControl('', { nonNullable: true });
@@ -222,8 +252,26 @@ export class SubscriptionsComponent {
     ).subscribe((result) => this.filtered.set(result));
   }
 
+  ngOnInit(): void {
+    this.emailDiscoveryApi.getStatus()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (status) => this.discoveryEnabled.set(status.featureEnabled),
+        error: () => this.discoveryEnabled.set(false),
+      });
+
+    const discoverParam = this.route.snapshot.queryParamMap.get('discover');
+    if (discoverParam === '1' || discoverParam === 'review') {
+      setTimeout(() => this.openDiscovery(discoverParam === 'review'), 0);
+    }
+  }
+
   openWizard(): void {
     this.wizard().show();
+  }
+
+  openDiscovery(startAtReview = false): void {
+    this.discovery().show(startAtReview);
   }
 
   formatStatus(status: SubscriptionStatus): string {
