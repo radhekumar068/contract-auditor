@@ -4,12 +4,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { CalendarDay } from '../../core/models/contract.models';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { userFacingHttpError } from '../../core/utils/http-error';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [DatePipe, MoneyPipe],
+  imports: [DatePipe, MoneyPipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="calendar-page">
@@ -25,13 +26,14 @@ import { userFacingHttpError } from '../../core/utils/http-error';
         </div>
       </header>
 
-      @if (loadError()) {
+      @if (loading()) {
+        <app-loading-spinner [centered]="true" label="Loading calendar..." />
+      } @else if (loadError()) {
         <div class="error-state">
           <p>{{ loadError() }}</p>
           <button type="button" (click)="reload()">Retry</button>
         </div>
-      }
-
+      } @else {
       <div class="calendar-grid">
         @for (day of weekDays; track day) {
           <div class="weekday">{{ day }}</div>
@@ -79,6 +81,7 @@ import { userFacingHttpError } from '../../core/utils/http-error';
         <span><span class="dot trial_end"></span> Trial End</span>
         <span><span class="dot cancellation_deadline"></span> Cancel Deadline</span>
       </div>
+      }
     </div>
   `,
   styles: [`
@@ -122,6 +125,7 @@ export class CalendarComponent {
   readonly selectedYear = signal(new Date().getFullYear());
   readonly selectedMonth = signal(new Date().getMonth() + 1);
   readonly calendarData = signal<CalendarDay[]>([]);
+  readonly loading = signal(true);
   readonly loadError = signal('');
   readonly hoveredDay = signal<CalendarCell | null>(null);
 
@@ -165,14 +169,21 @@ export class CalendarComponent {
   }
 
   private loadCalendar(): void {
+    this.loading.set(true);
     this.loadError.set('');
     this.analyticsService.getCalendar(this.selectedYear(), this.selectedMonth())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (data) => this.calendarData.set(data),
-        error: (error) => this.loadError.set(
-          userFacingHttpError(error, 'Unable to load the billing calendar. Please try again.'),
-        ),
+        next: (data) => {
+          this.calendarData.set(data);
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.loading.set(false);
+          this.loadError.set(
+            userFacingHttpError(error, 'Unable to load the billing calendar. Please try again.'),
+          );
+        },
       });
   }
 

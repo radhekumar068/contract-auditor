@@ -4,12 +4,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { TimelineEvent } from '../../core/models/contract.models';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { userFacingHttpError } from '../../core/utils/http-error';
 
 @Component({
   selector: 'app-timeline',
   standalone: true,
-  imports: [DatePipe, MoneyPipe],
+  imports: [DatePipe, MoneyPipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="timeline-page">
@@ -23,7 +24,9 @@ import { userFacingHttpError } from '../../core/utils/http-error';
         </select>
       </header>
 
-      @if (loadError()) {
+      @if (loading()) {
+        <app-loading-spinner [centered]="true" label="Loading timeline..." />
+      } @else if (loadError()) {
         <div class="error-state">
           <p>{{ loadError() }}</p>
           <button type="button" (click)="reload()">Retry</button>
@@ -99,6 +102,7 @@ export class TimelineComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly events = signal<TimelineEvent[]>([]);
+  readonly loading = signal(true);
   readonly loadError = signal('');
   readonly selectedYear = signal(new Date().getFullYear());
   readonly years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
@@ -126,14 +130,21 @@ export class TimelineComponent {
   }
 
   private loadTimeline(year: number): void {
+    this.loading.set(true);
     this.loadError.set('');
     this.analyticsService.getTimeline(year)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (events) => this.events.set(events),
-        error: (error) => this.loadError.set(
-          userFacingHttpError(error, 'Unable to load the timeline. Please try again.'),
-        ),
+        next: (events) => {
+          this.events.set(events);
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.loading.set(false);
+          this.loadError.set(
+            userFacingHttpError(error, 'Unable to load the timeline. Please try again.'),
+          );
+        },
       });
   }
 }

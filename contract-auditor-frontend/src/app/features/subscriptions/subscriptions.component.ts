@@ -11,12 +11,13 @@ import { userFacingHttpError } from '../../core/utils/http-error';
 import { VendorAvatarComponent } from '../../shared/components/vendor-avatar.component';
 import { AddContractWizardComponent } from '../../shared/components/add-contract-wizard.component';
 import { DiscoverFromEmailComponent } from '../../shared/components/discover-from-email.component';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
 
 @Component({
   selector: 'app-subscriptions',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, VendorAvatarComponent, AddContractWizardComponent, DiscoverFromEmailComponent, MoneyPipe],
+  imports: [DatePipe, ReactiveFormsModule, VendorAvatarComponent, AddContractWizardComponent, DiscoverFromEmailComponent, LoadingSpinnerComponent, MoneyPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="subscriptions-page">
@@ -62,7 +63,7 @@ import { MoneyPipe } from '../../shared/pipes/money.pipe';
       </div>
 
       @if (loading()) {
-        <p class="loading">Loading subscriptions...</p>
+        <app-loading-spinner [centered]="true" label="Loading subscriptions..." />
       } @else if (loadError()) {
         <div class="error-state">
           <p>{{ loadError() }}</p>

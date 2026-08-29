@@ -11,6 +11,7 @@ import { UrgentActionCardsComponent } from '../../shared/components/urgent-actio
 import { CancelAssistantModalComponent } from '../../shared/components/cancel-assistant-modal.component';
 import { AddContractWizardComponent } from '../../shared/components/add-contract-wizard.component';
 import { MonthlyTrendChartComponent } from '../../shared/components/monthly-trend-chart.component';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
 
 interface MetricTrend {
@@ -29,6 +30,7 @@ interface MetricTrend {
     CancelAssistantModalComponent,
     AddContractWizardComponent,
     MonthlyTrendChartComponent,
+    LoadingSpinnerComponent,
     MoneyPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -128,7 +130,7 @@ interface MetricTrend {
           <button type="button" class="btn-retry" (click)="reload()">Retry</button>
         </div>
       } @else {
-        <p class="loading">Loading dashboard...</p>
+        <app-loading-spinner [centered]="true" label="Loading dashboard..." />
       }
 
       <app-cancel-assistant-modal

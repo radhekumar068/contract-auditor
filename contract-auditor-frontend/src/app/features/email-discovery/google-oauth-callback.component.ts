@@ -3,10 +3,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmailDiscoveryApiService } from '../../core/services/email-discovery-api.service';
 import { userFacingHttpError } from '../../core/utils/http-error';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 
 @Component({
   selector: 'app-google-oauth-callback',
   standalone: true,
+  imports: [LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="callback-page">
@@ -14,7 +16,7 @@ import { userFacingHttpError } from '../../core/utils/http-error';
         <p class="error">{{ error() }}</p>
         <button type="button" (click)="goToSubscriptions()">Back to Subscriptions</button>
       } @else {
-        <p>Connecting Gmail...</p>
+        <app-loading-spinner [centered]="true" label="Connecting Gmail..." />
       }
     </div>
   `,

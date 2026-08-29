@@ -141,7 +141,7 @@ interface NavItem {
       flex-direction: column;
       padding: var(--sidebar-pad-y) var(--sidebar-pad-x);
       box-sizing: border-box;
-      overflow-y: auto;
+      overflow: hidden;
       z-index: 40;
     }
 
@@ -192,6 +192,8 @@ interface NavItem {
       flex: 1 1 auto;
       min-height: 0;
       align-content: flex-start;
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
 
     .nav-links li {
@@ -244,7 +246,7 @@ interface NavItem {
     .user-footer {
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       padding-top: 1.25rem;
-      margin-top: 1.5rem;
+      margin-top: auto;
       display: grid;
       gap: 0.875rem;
       flex-shrink: 0;

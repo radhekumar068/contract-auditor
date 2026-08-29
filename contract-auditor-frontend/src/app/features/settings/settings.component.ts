@@ -371,20 +371,38 @@ import {
     .settings-page { max-width: 1180px; }
     .top-header {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      gap: 0.75rem 1rem;
       margin-bottom: 1.15rem;
     }
-    h1 { margin: 0; font-size: 2rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
     h2 { margin: 0 0 1rem; font-size: 1.05rem; font-weight: 700; color: #0f172a; }
     .header-utils {
       display: flex;
       align-items: center;
       gap: 0.7rem;
       color: #334155;
+      flex-shrink: 0;
+      max-width: 100%;
     }
-    .header-name { font-weight: 600; font-size: 0.92rem; }
+    .header-name {
+      font-weight: 600;
+      font-size: 0.92rem;
+      max-width: 10rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .header-avatar {
       width: 34px; height: 34px; border-radius: 50%;
       background: #2a3149; color: #fff;
@@ -549,12 +567,18 @@ import {
     .sparkle {
       position: absolute; right: 14px; bottom: 10px; color: #cbd5e1; font-size: 1rem;
     }
-    @media (max-width: 980px) {
-      .cards, .cards.two { grid-template-columns: 1fr; }
+    @media (max-width: 1200px) {
       .header-name { display: none; }
     }
+    @media (max-width: 980px) {
+      .cards, .cards.two { grid-template-columns: 1fr; }
+    }
     @media (max-width: 720px) {
-      .top-header { align-items: flex-start; }
+      .top-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .header-utils { justify-content: flex-end; }
       .section-bar { flex-direction: column; align-items: stretch; }
       .split { grid-template-columns: 1fr; }
       .channel-row { margin-left: 0; }

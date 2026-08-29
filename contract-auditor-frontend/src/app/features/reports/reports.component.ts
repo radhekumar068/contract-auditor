@@ -27,6 +27,7 @@ import {
   SpendSavingsChartComponent,
   SpendSavingsPoint,
 } from '../../shared/components/spend-savings-chart.component';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
 
 type ReportType = 'leakage' | 'spend' | 'risk';
@@ -46,7 +47,7 @@ interface ReportRow {
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, MoneyPipe, SpendSavingsChartComponent, CancelAssistantModalComponent],
+  imports: [DatePipe, DecimalPipe, MoneyPipe, SpendSavingsChartComponent, CancelAssistantModalComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="reports-page">
@@ -158,7 +159,7 @@ interface ReportRow {
       }
 
       @if (loading()) {
-        <p class="loading">Loading financial reports...</p>
+        <app-loading-spinner [centered]="true" label="Loading financial reports..." />
       } @else if (loadError()) {
         <div class="error-state">
           <p>{{ loadError() }}</p>
@@ -309,18 +310,36 @@ interface ReportRow {
     .reports-page { display: grid; gap: 1.15rem; max-width: 1280px; }
     .top-header {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      gap: 0.75rem 1rem;
     }
-    h1 { margin: 0; font-size: 1.85rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+    h1 {
+      margin: 0;
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
     .header-utils {
       display: flex;
       align-items: center;
       gap: 0.7rem;
       color: #334155;
+      flex-shrink: 0;
+      max-width: 100%;
     }
-    .header-name { font-weight: 600; font-size: 0.92rem; }
+    .header-name {
+      font-weight: 600;
+      font-size: 0.92rem;
+      max-width: 10rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .header-avatar {
       width: 34px; height: 34px; border-radius: 50%;
       background: #2a3149; color: #fff;
@@ -505,10 +524,17 @@ interface ReportRow {
       .kpi-row { grid-template-columns: 1fr 1fr; }
       .btn-primary { margin-left: 0; }
     }
+    @media (max-width: 1200px) {
+      .header-name { display: none; }
+    }
     @media (max-width: 720px) {
       .kpi-row { grid-template-columns: 1fr; }
       h1 { font-size: 1.4rem; }
-      .header-name { display: none; }
+      .top-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .header-utils { justify-content: flex-end; }
       dl { grid-template-columns: 1fr; }
     }
     @media print {

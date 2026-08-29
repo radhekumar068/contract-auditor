@@ -9,11 +9,12 @@ import { Profile, User, UserRole } from '../../core/models/contract.models';
 import { AuthService } from '../../core/services/auth.service';
 import { UserApiService } from '../../core/services/user-api.service';
 import { userFacingHttpError } from '../../core/utils/http-error';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule],
+  imports: [DatePipe, ReactiveFormsModule, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="profile-page">
@@ -30,7 +31,7 @@ import { userFacingHttpError } from '../../core/utils/http-error';
       }
 
       @if (loading()) {
-        <p class="empty">Loading profile...</p>
+        <app-loading-spinner [centered]="true" label="Loading profile..." />
       } @else {
         @if (profile(); as current) {
         <section class="identity-card">

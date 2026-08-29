@@ -3,6 +3,7 @@ package com.contractauditor.service.impl;
 import com.contractauditor.domain.CountryCurrency;
 import com.contractauditor.domain.entity.PasswordResetToken;
 import com.contractauditor.domain.entity.User;
+import com.contractauditor.domain.enums.UserRole;
 import com.contractauditor.dto.request.ForgotPasswordRequest;
 import com.contractauditor.dto.request.LoginRequest;
 import com.contractauditor.dto.request.RegisterRequest;
@@ -97,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
         user.setCountryCode(countryCode);
         user.setPreferredCurrency(CountryCurrency.currencyFor(countryCode));
         user.setPhoneNumber(request.phoneNumber().trim());
-        user.setRole(request.role());
+        user.setRole(UserRole.USER);
         user.setLastLoginAt(Instant.now());
         userRepository.save(user);
         log.debug("AuthServiceImpl.register persisted userId={} countryCode={}", user.getId(), countryCode);

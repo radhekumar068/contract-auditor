@@ -6,6 +6,7 @@ import { DiscoveredSubscription, EmailConnectionStatus } from '../../core/models
 import { EmailDiscoveryApiService } from '../../core/services/email-discovery-api.service';
 import { userFacingHttpError } from '../../core/utils/http-error';
 import { VendorAvatarComponent } from './vendor-avatar.component';
+import { LoadingSpinnerComponent } from './loading-spinner.component';
 import { MoneyPipe } from '../pipes/money.pipe';
 
 type WizardStep = 'connect' | 'scan' | 'review';
@@ -13,7 +14,7 @@ type WizardStep = 'connect' | 'scan' | 'review';
 @Component({
   selector: 'app-discover-from-email',
   standalone: true,
-  imports: [DatePipe, FormsModule, VendorAvatarComponent, MoneyPipe],
+  imports: [DatePipe, FormsModule, VendorAvatarComponent, LoadingSpinnerComponent, MoneyPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (open()) {
@@ -48,9 +49,13 @@ type WizardStep = 'connect' | 'scan' | 'review';
               }
             </section>
           } @else if (step() === 'scan') {
-            <section class="step">
-              <p>Scanning your inbox for subscription billing emails...</p>
+            <section class="step scan-step">
               @if (busy()) {
+                <app-loading-spinner
+                  [centered]="true"
+                  [size]="40"
+                  label="Scanning your inbox for subscription billing emails..."
+                />
                 <p class="muted">This may take a moment.</p>
               }
             </section>

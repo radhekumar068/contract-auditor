@@ -72,6 +72,7 @@ import { userFacingHttpError } from '../../core/utils/http-error';
     label { display: grid; gap: .35rem; font-size: .875rem; color: #334155; }
     .hint { font-size: .75rem; color: #94a3b8; }
     input, select { padding: .65rem .75rem; border: 1px solid #cbd5e1; border-radius: 8px; }
+    select:disabled { background: #f1f5f9; color: #64748b; cursor: not-allowed; }
     button { padding: .75rem; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font-weight: 600; cursor: pointer; }
     button:disabled { opacity: .6; cursor: not-allowed; }
     .error { background: #fef2f2; color: #b91c1c; padding: .75rem; border-radius: 8px; margin-bottom: 1rem; }
@@ -90,7 +91,7 @@ export class RegisterComponent {
   readonly errorMessage = signal('');
 
   readonly countries = COUNTRIES;
-  readonly roles: UserRole[] = ['USER', 'ADMIN'];
+  readonly roles: UserRole[] = ['USER'];
 
   readonly form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.maxLength(255)]],
@@ -98,7 +99,7 @@ export class RegisterComponent {
     password: ['', [Validators.required, Validators.minLength(8)]],
     phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10,15}$/)]],
     countryCode: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
-    role: this.fb.nonNullable.control<UserRole>('USER', [Validators.required]),
+    role: this.fb.nonNullable.control<UserRole>({ value: 'USER', disabled: true }),
   });
 
   submit(): void {
@@ -107,7 +108,7 @@ export class RegisterComponent {
     }
     this.loading.set(true);
     this.errorMessage.set('');
-    this.authApi.register(this.form.getRawValue())
+    this.authApi.register({ ...this.form.getRawValue(), role: 'USER' })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => this.router.navigate(['/dashboard']),
