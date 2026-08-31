@@ -44,7 +44,8 @@ backup_current_deployment() {
     fi
 
     echo "==> Backing up current deployment to ${BACKUP_ROOT}..."
-    rm -rf "${BACKUP_ROOT}"
+    # Previous frontend backups are root-owned (copied from www-data); use sudo to clear.
+    sudo rm -rf "${BACKUP_ROOT}"
     mkdir -p "${BACKUP_ROOT}/frontend"
 
     if [[ "${has_jar}" == true ]]; then
@@ -55,6 +56,7 @@ backup_current_deployment() {
 
     if [[ "${has_frontend}" == true ]]; then
         sudo cp -a "${WEB_ROOT}/." "${BACKUP_ROOT}/frontend/"
+        sudo chown -R "$(whoami):$(whoami)" "${BACKUP_ROOT}"
     else
         echo "WARNING: Frontend not found at ${WEB_ROOT}; backup will not include frontend."
     fi
