@@ -41,7 +41,6 @@ public class EmailServiceImpl implements EmailService {
                     "EmailServiceImpl.sendPasswordResetEmail failed recipient={}: {}",
                     recipientEmail,
                     ex.getMessage());
-            log.info("Password reset link for {}: {}", recipientEmail, resetUrl);
             throw ex;
         }
     }

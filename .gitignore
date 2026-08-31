@@ -11,3 +11,12 @@ Thumbs.db
 .env
 *.env
 env.properties
+
+# Server-side deployment backups (created by deploy/deploy.sh)
+.deploy-backup/
+# Deploy docs/scripts (not tracked)
+deploy/oracle-server-commands/
+deploy/configure-mail.ps1
+deploy/configure-mail.sh
+deploy/env.properties.example
+deploy/setup-local-env.ps1

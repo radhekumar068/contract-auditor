@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 # Build and deploy Contract Auditor (run on the server after setup).
+# Backs up the previous deployment before publishing; auto-rolls back if health check fails.
+#
 # Usage: bash deploy/deploy.sh
+# Rollback manually: bash deploy/deploy-rollback.sh
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-$HOME/contract-auditor}"
-WEB_ROOT="/var/www/contract-auditor"
-ENV_FILE="/etc/contract-auditor.env"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=deploy-lib.sh
+source "${SCRIPT_DIR}/deploy-lib.sh"
 
 cd "${APP_DIR}"
+
+backup_current_deployment
+
 git pull --ff-only 2>/dev/null || true
 
 echo "==> Building backend..."
@@ -32,18 +38,34 @@ sudo rm -rf "${WEB_ROOT:?}"/*
 sudo cp -r "${FRONTEND_DIST}"/* "${WEB_ROOT}/"
 sudo chown -R www-data:www-data "${WEB_ROOT}"
 
-echo "==> Restarting services..."
-sudo systemctl restart contract-auditor
-sudo nginx -t && sudo systemctl reload nginx
+echo "==> Updating Nginx (security headers, rate limits, HTTPS)..."
+bash "${SCRIPT_DIR}/install-nginx.sh"
 
-sleep 30
-if curl -sf http://127.0.0.1:8081/api/health > /dev/null; then
+echo "==> Restarting backend..."
+sudo systemctl restart contract-auditor
+
+sleep "${HEALTH_WAIT_SECONDS}"
+if wait_for_health; then
     echo "==> Backend health check: OK"
+    echo ""
+    echo "Deploy complete."
+    if has_backup; then
+        # shellcheck disable=SC1090
+        source "${BACKUP_ROOT}/meta.env"
+        echo "Previous deployment backed up (${BACKUP_TIMESTAMP:-unknown}, commit: ${GIT_COMMIT:-unknown})."
+        echo "To revert: bash deploy/deploy-rollback.sh"
+    fi
+    print_deploy_url
 else
-    echo "WARNING: Backend health check failed. Check: sudo journalctl -u contract-auditor -n 50"
+    echo "ERROR: Deploy health check failed."
+    if has_backup; then
+        echo "==> Auto-rolling back to previous deployment..."
+        restore_from_backup
+        echo ""
+        echo "Rollback complete. The server is running the previous deployment."
+        print_deploy_url
+    else
+        echo "WARNING: No backup available to roll back. Check: sudo journalctl -u contract-auditor -n 50"
+    fi
     exit 1
 fi
-
-PUBLIC_IP="$(curl -4 -s --max-time 5 ifconfig.me 2>/dev/null || echo 'your-server-ip')"
-echo ""
-echo "Deploy complete. Visit: http://${PUBLIC_IP}/"

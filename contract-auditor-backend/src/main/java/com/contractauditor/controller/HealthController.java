@@ -25,8 +25,7 @@ public class HealthController {
                 "status", "UP",
                 "apiBase", "/api",
                 "auth", "/api/auth/login",
-                "health", "/api/health",
-                "swagger", "/swagger-ui.html");
+                "health", "/api/health");
         log.info("HealthController.root returning status=UP");
         return response;
     }

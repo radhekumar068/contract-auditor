@@ -1,5 +1,6 @@
 package com.contractauditor.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -57,14 +58,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    WebSecurityCustomizer webSecurityCustomizer() {
+    WebSecurityCustomizer webSecurityCustomizer(
+            @Value("${app.swagger.enabled:true}") boolean swaggerEnabled) {
+        if (!swaggerEnabled) {
+            return web -> {};
+        }
         return web -> web.ignoring().requestMatchers(SWAGGER_WHITELIST);
     }
 
     @Bean
     SecurityFilterChain filterChain(
             HttpSecurity http,
-            CorsConfigurationSource corsConfigurationSource) throws Exception {
+            CorsConfigurationSource corsConfigurationSource,
+            @Value("${app.swagger.enabled:true}") boolean swaggerEnabled) throws Exception {
         CookieCsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrfRepo.setCookieName("XSRF-TOKEN");
         csrfRepo.setHeaderName("X-XSRF-TOKEN");
@@ -78,14 +84,18 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/api/health", "/actuator/health").permitAll()
-                        .requestMatchers(PUBLIC_API).permitAll()
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers(PROTECTED_API).hasRole("USER")
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/", "/api/health").permitAll()
+                            .requestMatchers("/actuator/**").denyAll()
+                            .requestMatchers(PUBLIC_API).permitAll()
+                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+                    if (swaggerEnabled) {
+                        auth.requestMatchers(SWAGGER_WHITELIST).permitAll();
+                    }
+                    auth.requestMatchers("/api/users/**").authenticated()
+                            .requestMatchers(PROTECTED_API).hasRole("USER")
+                            .anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtAuthenticationFilter, CsrfFilter.class);
 
         return http.build();
