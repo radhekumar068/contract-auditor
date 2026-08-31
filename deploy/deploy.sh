@@ -42,6 +42,7 @@ echo "==> Updating Nginx (security headers, rate limits, HTTPS)..."
 bash "${SCRIPT_DIR}/install-nginx.sh"
 
 echo "==> Restarting backend..."
+echo "    (deploy does not modify /etc/contract-auditor.env — email discovery stays as configured)"
 sudo systemctl restart contract-auditor
 
 sleep "${HEALTH_WAIT_SECONDS}"

@@ -92,6 +92,7 @@ public class EmailDiscoveryServiceImpl implements EmailDiscoveryService {
         Optional<EmailConnection> connection = emailConnectionRepository.findByUserIdAndRevokedAtIsNull(user.getId());
         return new EmailConnectionStatusResponse(
                 properties.isConfigured(),
+                properties.isEnabled(),
                 connection.isPresent(),
                 connection.map(EmailConnection::getEmailAddress).orElse(null),
                 connection.map(EmailConnection::getConnectedAt).orElse(null),

@@ -56,11 +56,13 @@ else
     fi
 fi
 
+# Only when missing or empty — never regenerated on deploy/deploy.sh restarts.
 if ! grep -q "^EMAIL_TOKEN_ENCRYPTION_KEY=" "${ENV_FILE}" \
     || grep -q "^EMAIL_TOKEN_ENCRYPTION_KEY=$" "${ENV_FILE}"; then
     EMAIL_TOKEN_ENCRYPTION_KEY="$(openssl rand -base64 32 | tr -d '\n')"
     upsert_env "EMAIL_TOKEN_ENCRYPTION_KEY" "${EMAIL_TOKEN_ENCRYPTION_KEY}"
-    echo "    Generated new EMAIL_TOKEN_ENCRYPTION_KEY"
+    echo "    Generated new EMAIL_TOKEN_ENCRYPTION_KEY (saved in ${ENV_FILE})"
+    echo "    View later: sudo grep EMAIL_TOKEN_ENCRYPTION_KEY ${ENV_FILE}"
 fi
 
 if ! grep -q "^EMAIL_DISCOVERY_ENABLED=" "${ENV_FILE}"; then

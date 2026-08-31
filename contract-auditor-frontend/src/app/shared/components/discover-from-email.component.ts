@@ -270,7 +270,14 @@ export class DiscoverFromEmailComponent {
           }
         },
         error: () => {
-          this.status.set({ featureEnabled: false, connected: false, emailAddress: null, connectedAt: null, lastSyncAt: null });
+          this.status.set({
+            featureEnabled: false,
+            settingEnabled: false,
+            connected: false,
+            emailAddress: null,
+            connectedAt: null,
+            lastSyncAt: null,
+          });
         },
       });
   }

@@ -223,6 +223,8 @@ export const VENDOR_PRESETS: VendorPreset[] = [
 
 export interface EmailConnectionStatus {
   featureEnabled: boolean;
+  /** Mirrors EMAIL_DISCOVERY_ENABLED on the server (false => button hidden). */
+  settingEnabled: boolean;
   connected: boolean;
   emailAddress: string | null;
   connectedAt: string | null;
