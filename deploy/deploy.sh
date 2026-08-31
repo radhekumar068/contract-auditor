@@ -39,7 +39,8 @@ sudo cp -r "${FRONTEND_DIST}"/* "${WEB_ROOT}/"
 sudo chown -R www-data:www-data "${WEB_ROOT}"
 
 echo "==> Updating Nginx (security headers, rate limits, HTTPS)..."
-bash "${SCRIPT_DIR}/install-nginx.sh"
+PUBLIC_DOMAIN="$(sudo grep '^CORS_ALLOWED_ORIGINS=' /etc/contract-auditor.env 2>/dev/null | tail -n 1 | sed -E 's|^CORS_ALLOWED_ORIGINS=https?://([^/]+).*|\1|' || true)"
+PUBLIC_DOMAIN="${PUBLIC_DOMAIN:-}" bash "${SCRIPT_DIR}/install-nginx.sh"
 
 echo "==> Restarting backend..."
 echo "    (deploy does not modify /etc/contract-auditor.env — email discovery stays as configured)"

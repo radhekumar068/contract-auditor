@@ -17,8 +17,13 @@ CERTBOT_WEBROOT="/var/www/certbot"
 
 read_env_value() {
     local key="$1"
-    if [[ -f "${ENV_FILE}" ]]; then
+    if [[ ! -f "${ENV_FILE}" ]]; then
+        return 0
+    fi
+    if [[ -r "${ENV_FILE}" ]]; then
         grep -E "^${key}=" "${ENV_FILE}" | tail -n 1 | cut -d= -f2- || true
+    else
+        sudo grep -E "^${key}=" "${ENV_FILE}" | tail -n 1 | cut -d= -f2- || true
     fi
 }
 
@@ -88,7 +93,11 @@ write_ssl_params_snippet() {
     rm -f "${tmp}"
 }
 
-if [[ -f "${SSL_CERT}" && -f "${SSL_KEY}" ]]; then
+cert_files_exist() {
+    sudo test -f "${SSL_CERT}" && sudo test -f "${SSL_KEY}"
+}
+
+if cert_files_exist; then
     echo "==> SSL certificates found for ${PUBLIC_HOST}; installing HTTPS config..."
     write_ssl_params_snippet
     render_template "${NGINX_DIR}/contract-auditor-https.conf.template" "${SITE_AVAILABLE}"

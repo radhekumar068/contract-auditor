@@ -16,7 +16,7 @@ fi
 upsert_env() {
     local key="$1"
     local value="$2"
-    if grep -q "^${key}=" "${ENV_FILE}"; then
+    if sudo grep -q "^${key}=" "${ENV_FILE}"; then
         sudo sed -i "s|^${key}=.*|${key}=${value}|" "${ENV_FILE}"
     else
         echo "${key}=${value}" | sudo tee -a "${ENV_FILE}" > /dev/null
@@ -47,25 +47,25 @@ upsert_env "SWAGGER_ENABLED" "false"
 upsert_env "CORS_ALLOWED_ORIGINS" "${PUBLIC_BASE_URL}"
 upsert_env "FRONTEND_BASE_URL" "${PUBLIC_BASE_URL}"
 
-if ! grep -q "^GOOGLE_OAUTH_REDIRECT_URI=" "${ENV_FILE}"; then
+if ! sudo grep -q "^GOOGLE_OAUTH_REDIRECT_URI=" "${ENV_FILE}"; then
     upsert_env "GOOGLE_OAUTH_REDIRECT_URI" "${PUBLIC_BASE_URL}/oauth/google/callback"
 else
-    current_redirect="$(grep "^GOOGLE_OAUTH_REDIRECT_URI=" "${ENV_FILE}" | cut -d= -f2-)"
+    current_redirect="$(sudo grep "^GOOGLE_OAUTH_REDIRECT_URI=" "${ENV_FILE}" | tail -n 1 | cut -d= -f2-)"
     if [[ "${current_redirect}" == http://* ]]; then
         upsert_env "GOOGLE_OAUTH_REDIRECT_URI" "${PUBLIC_BASE_URL}/oauth/google/callback"
     fi
 fi
 
 # Only when missing or empty — never regenerated on deploy/deploy.sh restarts.
-if ! grep -q "^EMAIL_TOKEN_ENCRYPTION_KEY=" "${ENV_FILE}" \
-    || grep -q "^EMAIL_TOKEN_ENCRYPTION_KEY=$" "${ENV_FILE}"; then
+if ! sudo grep -q "^EMAIL_TOKEN_ENCRYPTION_KEY=" "${ENV_FILE}" \
+    || sudo grep -q "^EMAIL_TOKEN_ENCRYPTION_KEY=$" "${ENV_FILE}"; then
     EMAIL_TOKEN_ENCRYPTION_KEY="$(openssl rand -base64 32 | tr -d '\n')"
     upsert_env "EMAIL_TOKEN_ENCRYPTION_KEY" "${EMAIL_TOKEN_ENCRYPTION_KEY}"
     echo "    Generated new EMAIL_TOKEN_ENCRYPTION_KEY (saved in ${ENV_FILE})"
     echo "    View later: sudo grep EMAIL_TOKEN_ENCRYPTION_KEY ${ENV_FILE}"
 fi
 
-if ! grep -q "^EMAIL_DISCOVERY_ENABLED=" "${ENV_FILE}"; then
+if ! sudo grep -q "^EMAIL_DISCOVERY_ENABLED=" "${ENV_FILE}"; then
     upsert_env "EMAIL_DISCOVERY_ENABLED" "false"
 fi
 
