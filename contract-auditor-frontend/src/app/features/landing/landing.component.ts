@@ -174,6 +174,8 @@ interface PricingPlan {
           <a routerLink="/" fragment="features">Product Features</a>
           <a routerLink="/" fragment="pricing">Pricing</a>
           <a routerLink="/" fragment="about">About</a>
+          <a routerLink="/privacy">Privacy Policy</a>
+          <a routerLink="/terms">Terms of Service</a>
         </nav>
       </footer>
     </div>
